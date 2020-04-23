@@ -277,7 +277,27 @@ update_binary_command(const char* path, ZipArchive* zip, int retry_count,
         LOGE("Can't make %s\n", binary);
         return INSTALL_ERROR;
     }
+
+#ifdef LOCAL_BINARY_PATH
+    const char* local_binary = LOCAL_BINARY_PATH;
+    if (metadata["ota-type"] == "FILE" && metadata["ota-type"] == "BLOCK" || access(local_binary, F_OK) == 0) {
+        LOGI("Package is OTA update use local bindary\n");
+        int client=fork();
+        if(client==0){
+            close(fd);
+            execl("/sbin/cp","%s %s",local_binary,binary);
+            _exit(1);
+        }else{
+            int status;
+            waitpid(client,&status,0);
+        }
+    }else{
+        LOGI("Package is not OTA update not use local bindary\n");
+        bool ok = mzExtractZipEntryToFile(zip, binary_entry, fd);
+    }
+#else
     bool ok = mzExtractZipEntryToFile(zip, binary_entry, fd);
+#endif // USE_LOCAL_BINDARY
     close(fd);
 
     if (!ok) {

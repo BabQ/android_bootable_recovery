@@ -14,6 +14,14 @@
 
 LOCAL_PATH := $(call my-dir)
 
+ifeq ($(TW_USE_LOCAL_BINARY), true)
+    ifdef TW_LOCAL_BINARY_PATH
+        LOCAL_CFLAGS += -DLOCAL_BINARY_PATH $(TW_LOCAL_BINARY_PATH)
+    else
+        LOCAL_CFLAGS += -DLOCAL_BINARY_PATH "/sbin/updater"
+    endif
+endif
+
 ifdef project-path-for
     ifeq ($(LOCAL_PATH),$(call project-path-for,recovery))
         PROJECT_PATH_AGREES := true
